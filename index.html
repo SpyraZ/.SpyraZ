@@ -331,6 +331,8 @@
     <button class="nav-link" id="nav-leaderboard" onclick="showPage('leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</button>
     <button class="nav-link" id="nav-links" onclick="showPage('links')"><i class="fas fa-link"></i> Our Channels</button>
     <button class="nav-link market-tab" id="nav-market" onclick="showPage('market')"><i class="fas fa-shopping-cart"></i> Points Market</button>
+    <a href="profile.html" style="text-decoration:none; color:#ffffff; padding:12px 15px; margin-bottom:8px; border-radius:12px; display:flex; align-items:center; gap:10px; font-weight:600; font-size:1rem; opacity:0.8; transition:background 0.2s; background:rgba(0,212,255,0.08); border:2px dashed #00d4ff;">
+  <i class="fas fa-id-card"></i> My Profile</a>
     <div class="sidebar-footer" id="sidebarAuth"></div>
 </nav>
 
@@ -985,7 +987,7 @@ document.getElementById('logoTrigger').addEventListener('click', () => {
     logoClickCount++;
     clearTimeout(logoClickTimer);
     logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 3000);
-    if (logoClickCount >= 5) {
+    if (logoClickCount >= 15) {
         logoClickCount = 0;
         document.getElementById('adminPanel').style.display = document.getElementById('adminPanel').style.display === 'block' ? 'none' : 'block';
     }
