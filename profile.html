@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SpyraZ | Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #7DF9FF;
+      --accent2: #FF6BF8;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --text: #f0f0f0;
+      --muted: rgba(255,255,255,0.45);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      overflow: hidden;
+      background: #000;
+      cursor: default;
+    }
+
+    /* ─── CUSTOM CURSOR ─── */
+    body { cursor: none; }
+    #cursor {
+      position: fixed; width: 10px; height: 10px;
+      border-radius: 50%; background: var(--accent);
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform 0.1s, background 0.2s;
+      box-shadow: 0 0 12px var(--accent);
+    }
+    #cursor-ring {
+      position: fixed; width: 32px; height: 32px;
+      border-radius: 50%; border: 1.5px solid var(--accent2);
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: transform 0.18s ease, width 0.2s, height 0.2s, opacity 0.2s;
+      opacity: 0.7;
+    }
+
+    /* ─── VIDEO BG ─── */
+    #bg-video {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: brightness(0.38) saturate(1.4);
+    }
+    #bg-fallback {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at 30% 40%, #0d0d2b 0%, #000 60%),
+                  radial-gradient(ellipse at 80% 80%, #1a0028 0%, transparent 60%);
+      z-index: 0;
+    }
+    /* Grain overlay */
+    #grain {
+      position: fixed; inset: 0; z-index: 1;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    /* Vignette */
+    #vignette {
+      position: fixed; inset: 0; z-index: 2;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none;
+    }
+
+    /* ─── ENTER SCREEN ─── */
+    #enter-screen {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 18px;
+      backdrop-filter: blur(2px);
+      transition: opacity 0.7s ease, visibility 0.7s;
+    }
+    #enter-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .enter-ring {
+      width: 110px; height: 110px; border-radius: 50%;
+      border: 1.5px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      animation: pulse-ring 2.4s ease-in-out infinite;
+      position: relative;
+    }
+    .enter-ring::before {
+      content: '';
+      position: absolute; inset: -10px; border-radius: 50%;
+      border: 1px solid rgba(125,249,255,0.15);
+      animation: pulse-ring 2.4s ease-in-out infinite 0.4s;
+    }
+    .enter-ring::after {
+      content: '';
+      position: absolute; inset: -22px; border-radius: 50%;
+      border: 1px solid rgba(125,249,255,0.07);
+      animation: pulse-ring 2.4s ease-in-out infinite 0.8s;
+    }
+    @keyframes pulse-ring {
+      0%,100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.04); }
+    }
+    .enter-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--glass-border);
+    }
+    .enter-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--muted);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+    /* ─── MAIN CARD ─── */
+    #main {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.7s ease 0.1s, visibility 0.7s;
+    }
+    #main.visible { opacity: 1; visibility: visible; }
+
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 36px 32px 28px;
+      width: min(380px, 92vw);
+      backdrop-filter: blur(28px) saturate(1.5);
+      text-align: center;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.04) inset;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: -60%; left: -30%;
+      width: 80%; height: 80%;
+      background: radial-gradient(circle, rgba(125,249,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .card::after {
+      content: '';
+      position: absolute; bottom: -50%; right: -20%;
+      width: 70%; height: 70%;
+      background: radial-gradient(circle, rgba(255,107,248,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Avatar */
+    .avatar-wrap {
+      position: relative; display: inline-block; margin-bottom: 14px;
+    }
+    .avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid transparent;
+      background: linear-gradient(#000,#000) padding-box,
+                  linear-gradient(135deg, var(--accent), var(--accent2)) border-box;
+      box-shadow: 0 0 24px rgba(125,249,255,0.25);
+      display: block; margin: 0 auto;
+    }
+    .online-dot {
+      position: absolute; bottom: 5px; right: 5px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #3dff8f;
+      border: 2.5px solid rgba(0,0,0,0.6);
+      box-shadow: 0 0 8px #3dff8f;
+    }
+
+    /* Name + bio */
+    .username {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 800;
+      letter-spacing: 0.01em;
+      background: linear-gradient(90deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+    .uid {
+      font-size: 11px; color: var(--muted);
+      letter-spacing: 0.1em; margin-bottom: 10px;
+    }
+    .bio {
+      font-size: 13px; color: rgba(255,255,255,0.6);
+      line-height: 1.6; margin-bottom: 20px;
+      font-weight: 300;
+    }
+
+    /* Badge row */
+    .badges {
+      display: flex; gap: 6px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .badge {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px;
+      border: 1px solid;
+    }
+    .badge.cyan  { color: var(--accent);  border-color: rgba(125,249,255,0.3); background: rgba(125,249,255,0.06); }
+    .badge.pink  { color: var(--accent2); border-color: rgba(255,107,248,0.3); background: rgba(255,107,248,0.06); }
+    .badge.green { color: #3dff8f;        border-color: rgba(61,255,143,0.3);  background: rgba(61,255,143,0.06); }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+      margin: 0 -4px 20px;
+    }
+
+    /* Social links */
+    .socials { display: flex; flex-direction: column; gap: 9px; margin-bottom: 22px; }
+
+    .social-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px; border-radius: 12px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      text-decoration: none; color: var(--text);
+      font-size: 13px; font-weight: 500;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      position: relative; overflow: hidden;
+      cursor: none;
+    }
+    .social-btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.22);
+      transform: translateY(-1px);
+    }
+    .social-btn .icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 15px;
+    }
+    .social-btn .label { flex: 1; text-align: left; }
+    .social-btn .arrow { color: var(--muted); font-size: 12px; }
+
+    .yt   .icon { background: rgba(255,0,0,0.15); }
+    .dc   .icon { background: rgba(88,101,242,0.15); }
+    .rb   .icon { background: rgba(255,255,255,0.08); }
+    .sp   .icon { background: rgba(30,215,96,0.15); }
+    .ig   .icon { background: rgba(240,80,160,0.12); }
+
+    /* Views */
+    .views-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; color: var(--muted); font-size: 12px;
+    }
+    .views-row span { color: var(--accent); font-weight: 700; }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      z-index: 200;
+      background: rgba(20,20,20,0.9); border: 1px solid var(--glass-border);
+      padding: 9px 18px; border-radius: 100px;
+      font-size: 12px; color: var(--accent);
+      backdrop-filter: blur(12px);
+      opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- BG -->
+<div id="bg-fallback"></div>
+
+<!-- 
+  ════════════════════════════════════════
+  TO ADD YOUR VIDEO:
+  Replace the src below with your video URL or file path.
+  Works with YouTube (use a looping embed), local .mp4, or any direct .mp4 link.
+  ════════════════════════════════════════
+-->
+<video id="bg-video" autoplay muted loop playsinline>
+<source src="Zenitsu - Royalty _ 100 Sub edit [Edit_AMV] + Project file_1080p.mp4" type="video/mp4">
+</video>
+
+<div id="grain"></div>
+<div id="vignette"></div>
+
+<!-- Enter screen -->
+<div id="enter-screen">
+  <div class="enter-ring">
+    <!-- Replace with your own avatar URL -->
+    <img class="enter-avatar" src="https://spyraz.github.io/.SpyraZ/icon.jpg" alt="avatar" onerror="this.src='https://placehold.co/80x80/111/7DF9FF?text=S'">
+  </div>
+  <p class="enter-label">click to enter</p>
+</div>
+
+<!-- Main card -->
+<div id="main">
+  <div class="card">
+
+    <div class="avatar-wrap">
+      <!-- Replace with your own avatar URL -->
+      <img class="avatar" src="https://spyraz.github.io/.SpyraZ/icon.jpg" alt="avatar" onerror="this.src='https://placehold.co/90x90/111/7DF9FF?text=S'">
+      <div class="online-dot"></div>
+    </div>
+
+    <!-- ── EDIT YOUR INFO HERE ── -->
+    <div class="username">SpyraZ</div>
+    <div class="uid">UID #001 · spyraz.github.io</div>
+    <div class="bio">Your one-stop destination for giveaways,<br>fruits & more 🍎</div>
+
+    <div class="badges">
+      <span class="badge cyan">🎮 Roblox</span>
+      <span class="badge pink">✨ Creator</span>
+      <span class="badge green">🟢 Online</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="socials">
+
+      <!-- YouTube -->
+      <a class="social-btn yt" href="https://www.youtube.com/@SpyraZ" target="_blank">
+        <div class="icon">▶️</div>
+        <span class="label">YouTube · SpyraZ</span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <!-- Discord -->
+      <a class="social-btn dc" href="https://discord.gg/vuya9pHDEp" target="_blank">
+        <div class="icon">💬</div>
+        <span class="label">Discord · Join Server</span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <!-- Roblox (copy) -->
+      <div class="social-btn rb" id="copy-roblox" style="cursor:none">
+        <div class="icon">🎮</div>
+        <span class="label">Roblox · SpyraZ</span>
+        <span class="arrow">📋</span>
+      </div>
+
+      <!-- Add more socials below as needed -->
+
+    </div>
+
+    <div class="views-row">
+      👁 <span id="view-count">—</span> profile views
+    </div>
+
+  </div>
+</div>
+
+<div id="toast">Copied to clipboard!</div>
+
+<script>
+  // ─── Cursor
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  function animateCursor(){
+    rx += (mx-rx)*0.12; ry += (my-ry)*0.12;
+    cur.style.left = mx+'px'; cur.style.top = my+'px';
+    ring.style.left = rx+'px'; ring.style.top = ry+'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // ─── Enter screen
+  const enterScreen = document.getElementById('enter-screen');
+  const mainEl = document.getElementById('main');
+  enterScreen.addEventListener('click', () => {
+    enterScreen.classList.add('hidden');
+    mainEl.classList.add('visible');
+    countView();
+  });
+
+  // ─── View counter (localStorage)
+  function countView(){
+    const key = 'spyraz_views';
+    let v = parseInt(localStorage.getItem(key)||'0');
+    // Only count new session
+    if(!sessionStorage.getItem('visited')){
+      v++; localStorage.setItem(key, v);
+      sessionStorage.setItem('visited','1');
+    }
+    document.getElementById('view-count').textContent = v.toLocaleString();
+  }
+
+  // ─── Copy Roblox
+  document.getElementById('copy-roblox').addEventListener('click', () => {
+    navigator.clipboard.writeText('SpyraZ').then(()=>showToast('Roblox username copied!'));
+  });
+
+  // ─── Toast
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
